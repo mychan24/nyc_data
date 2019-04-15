@@ -1,0 +1,27 @@
+---
+title: "NYC Crime Rate Explore"
+author: "Micaela Chan"
+date: "4/15/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+datafile <- "./data/NYPD_Complaint_Data_Current__Year_To_Date_.Rdata"
+
+if(!file.exists(datafile)){   # If data not available, download it.
+  library(RSocrata)
+  crime <- read.socrata("https://data.cityofnewyork.us/resource/7x9x-zpz6.json") # 460k+ rows of data
+  save(crime, file = "./data/NYPD_Complaint_Data_Current__Year_To_Date_.Rdata")
+}else{
+  load(datafile)
+}
+```
+
+```{r summary}
+
+names(crime)
+
+```
+
