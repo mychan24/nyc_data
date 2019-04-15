@@ -3,6 +3,9 @@ NYC Crime Rate Explore
 Micaela Chan
 4/15/2019
 
+NYC Crime Incident by Month (2018)
+----------------------------------
+
 ``` r
 ### == Data Dictionary == ###
 # cmplnt_num = unique ID for each complaint
@@ -41,6 +44,9 @@ ggplot(c, aes(x=month_incidents)) +
 
 ![](NYC_CrimeRate_Exp_files/figure-markdown_github/crime_month-1.png)
 
+NYC Crime Incident Offense Description
+--------------------------------------
+
 ``` r
 # Number of Offense Description
 c$ofns_desc <- factor(c$ofns_desc)
@@ -58,6 +64,8 @@ ggplot(data = c, aes(x=ofns_desc)) +
 ```
 
 ![](NYC_CrimeRate_Exp_files/figure-markdown_github/crime_type-1.png)
+
+#### Top 20 Offense Description (ordered by count)
 
 ``` r
 # Remove data with no Offense Description
@@ -83,8 +91,8 @@ c %>%
 
 ![](NYC_CrimeRate_Exp_files/figure-markdown_github/off_descrip_ordered-1.png)
 
-Map them? (To Be Continued...)
-------------------------------
+NYC Mapping (To Be Continued...)
+--------------------------------
 
 #### Neighborhood Level
 

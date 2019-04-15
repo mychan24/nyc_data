@@ -21,6 +21,8 @@ if(!file.exists(datafile)){   # If data not available, download it.
 }
 ```
 
+## NYC Crime Incident by Month (2018)
+
 ```{r crime_month}
 ### == Data Dictionary == ###
 # cmplnt_num = unique ID for each complaint
@@ -54,6 +56,7 @@ ggplot(c, aes(x=month_incidents)) +
 
 ```
 
+## NYC Crime Incident Offense Description 
 ```{r crime_type}
 # Number of Offense Description
 c$ofns_desc <- factor(c$ofns_desc)
@@ -67,6 +70,7 @@ ggplot(data = c, aes(x=ofns_desc)) +
 
 ```
 
+#### Top 20 Offense Description (ordered by count)
 ```{r off_descrip_ordered, fig.width=10, fig.height=6}
 # Remove data with no Offense Description
 sum(is.na(c$ofns_desc))
@@ -85,7 +89,7 @@ c %>%
 
 ```
 
-## Map them? (To Be Continued...)
+## NYC Mapping (To Be Continued...)
 
 #### Neighborhood Level
 
