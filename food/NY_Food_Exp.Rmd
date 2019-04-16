@@ -89,32 +89,62 @@ df %>%
 ```
 
 ## Inspections finding Critical Violation
+
+* Critical Violations seems to occur more during summer months (200+ violations)
+
 ```{r}
 df$critical_violation <- "N"
 df$critical_violation[df$total_critical_violations!=0] <- "Y"
+
+table(df$critical_violation, df$month)
 
 df %>%
   filter(year=="2018") %>%
   filter(critical_violation=="Y") %>%
   ggplot(aes(x=month)) +
-  geom_bar(stat = "count") +
-  ggtitle("Number of Inspection with Critical Violations")
+  geom_bar(stat = "count", aes(fill=..count..)) +
+  geom_hline(yintercept = 200, colour="grey50", linetype="dashed") +
+  scale_fill_gradient(low = "ghostwhite", high = "firebrick") + 
+  ggtitle("Number of Inspection with Critical Violations") +
+  theme_bw()
+
+## Proportion to # of Inspections Occuring
+
+df %>%
+  filter(year=="2018") %>%
+  group_by(month) %>%
+  summarise(month_n = n(),
+            crit_n = n(critical_violation))  %>%
   
+    ggplot(aes(fill=critical_violation, x=month)) + 
+    geom_bar(stat="count", position="fill") +
+    scale_fill_manual(values = c("grey80", "firebrick")) +
+    theme_bw()
+
+  
+  ggplot(aes(x=month, group=critical_violation)) +
+  geom_bar(stat = "count", aes(fill=..count..)) +
+  geom_hline(yintercept = 200, colour="grey50", linetype="dashed") +
+  ggtitle("Number of Inspection with Critical Violations") +
 
 ```
 
 ## Inspections finding Non-critical Violations
 
-```{r}
+```{r noncrit}
 df$noncritical_violation <- "N"
 df$noncritical_violation[df$total_noncritical_violations!=0] <- "Y"
+
 
 df %>%
   filter(year=="2018") %>%
   filter(noncritical_violation=="Y") %>%
   ggplot(aes(x=month)) +
-  geom_bar(stat = "count") +
-  ggtitle("Number of Inspection with Non-critical Violations")
+  geom_bar(stat = "count", aes(fill=..count..)) +
+  geom_hline(yintercept = 1000, colour="grey50", linetype="dashed") +
+  scale_fill_gradient(low = "grey80", high = "dodgerblue3") + 
+  ggtitle("Number of Inspection with Non-critical Violations") +
+  theme_bw()
 
 ```
 
