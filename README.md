@@ -22,3 +22,8 @@
 * [NYC Crime data (2018)](https://data.cityofnewyork.us/Public-Safety/NYPD-Complaint-Data-Current-Year-To-Date-/5uac-w243/data) (data.cityofnewyork.us)
 * [NYC Gentrification data](https://www.governing.com/gov-data/new-york-gentrification-maps-demographic-data.html#citieslist) (governing.com)
 * [NY State Food Inspection](https://health.data.ny.gov/Health/Food-Service-Establishment-Last-Inspection/cnih-y5dw)
+
+
+
+#### Special Thanks
+> All these started with existential crisis group sessions with [@coldpringles](https://github.com/coldpringles) and @SamD 
