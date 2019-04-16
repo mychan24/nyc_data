@@ -2,6 +2,11 @@
 * Repo for testing out project ideas. 
 * Ideas that move beyond one .md will become its own repo. 
 
+## Current projects:
+* Simple NYC crime incident exploration (also tested mapping but not with data on it) [md link](https://github.com/mychan24/rand_data/blob/master/crime/NYC_CrimeRate_Exp.md)
+* NY State food inspection data + Census median income by county [md link](https://github.com/mychan24/rand_data/blob/master/food/NY_Food_Exp.md)
+
+
 ## List of datasets: 
 
 ### National Level:
