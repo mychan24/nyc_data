@@ -6,6 +6,8 @@
 * Simple NYC crime incident exploration (also tested mapping but not with data on it) [md link](https://github.com/mychan24/rand_data/blob/master/crime/NYC_CrimeRate_Exp.md)
 * NY State food inspection data + Census median income by county [md link](https://github.com/mychan24/rand_data/blob/master/food/NY_Food_Exp.md)
 
+<img src="https://github.com/mychan24/rand_data/blob/master/food/NY_Food_Exp_files/figure-markdown_github/unnamed-chunk-1-1.png?raw=true" width="300" height="220"><img src="https://github.com/mychan24/rand_data/blob/master/food/NY_Food_Exp_files/figure-markdown_github/cor_income_violation-1.png?raw=true" width="300" height="220">
+
 
 ## List of datasets: 
 
