@@ -26,7 +26,7 @@ if(!file.exists(datafile)){   # If data not available, download it.
 
 ```{r check_data}
 # Glance data
-head(df)
+# head(df)
 
 # zipcode has lots of white spaces
 head(df$zip_code)
@@ -59,6 +59,8 @@ ggplot(data = df, aes(x=year)) +
 
 ## Across months, the spread of inspection seems pretty even
 
+* Note that these are # of inspections, not violations.
+
 ```{r plot_2018_month}
 df %>%
   filter(year=="2018") %>% 
@@ -85,3 +87,34 @@ df %>%
     theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
     ggtitle("Number of Inspection by County Per month (2018)")
 ```
+
+## Inspections finding Critical Violation
+```{r}
+df$critical_violation <- "N"
+df$critical_violation[df$total_critical_violations!=0] <- "Y"
+
+df %>%
+  filter(year=="2018") %>%
+  filter(critical_violation=="Y") %>%
+  ggplot(aes(x=month)) +
+  geom_bar(stat = "count") +
+  ggtitle("Number of Inspection with Critical Violations")
+  
+
+```
+
+## Inspections finding Non-critical Violations
+
+```{r}
+df$noncritical_violation <- "N"
+df$noncritical_violation[df$total_noncritical_violations!=0] <- "Y"
+
+df %>%
+  filter(year=="2018") %>%
+  filter(noncritical_violation=="Y") %>%
+  ggplot(aes(x=month)) +
+  geom_bar(stat = "count") +
+  ggtitle("Number of Inspection with Non-critical Violations")
+
+```
+
