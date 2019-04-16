@@ -5,9 +5,11 @@ date: "4/15/2019"
 output: github_document
 ---
 
-```{r setup, include=FALSE}
+### Load Data
+```{r setup, include=TRUE, warning=F}
 knitr::opts_chunk$set(echo = TRUE)
 suppressMessages(library(tidyverse))
+suppressMessages(library(ggpubr))
 
 ## == Load Data == ## 
 datafile <- "./data/NY_Food-Service-Establishment-Inspections_2005_2019.Rdata"
@@ -48,7 +50,9 @@ df$year <- substr(cut(df$date_format, breaks = "year"), 1,4)    # Make Year vari
 df$month <- substr(cut(df$date_format, breaks = "month"), 1,7)  # Make Month variable
 ```
 
-## This data is very 2018-centric. Might just want to only analyze 2018 data.
+## This data is very 2018-centric
+
+* May just want to only analyze 2018 data
 
 ```{r plot_year}
 ggplot(data = df, aes(x=year)) +
@@ -57,17 +61,25 @@ ggplot(data = df, aes(x=year)) +
   ggtitle("Number of inspection per year")
 ```
 
-## Across months, the spread of inspection seems pretty even
+## Across 2018, the spread of inspection seems heavier on the later months
 
 * Note that these are # of inspections, not violations.
 
 ```{r plot_2018_month}
 df %>%
   filter(year=="2018") %>% 
-    ggplot(aes(x=month)) +
-    geom_bar(stat = "count") +
-    theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
-    ggtitle("Number of Inspection by Month (2018)")
+  group_by(month) %>%
+  summarise(n=n()) %>%
+  ggdotchart(x="month", y="n", 
+             sorting = "descending", 
+             add = "segments",
+             rotate = TRUE,
+             dot.size = 8,
+             label = "n", 
+             font.label = list(color = "white", size = 8, 
+                               vjust = 0.5),
+             ggtheme = theme_pubr(), 
+             title = "Number of Inspections by Month in 2018 (Most Inspection On Top)")
 
 df %>%
   filter(year=="2018") %>% 
@@ -76,16 +88,8 @@ df %>%
     facet_wrap(~inspection_type) +
     theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
     ggtitle("Number of Inspection by Month x Inspection Type (2018)")
-```
 
-```{r plot_2018_month_county}
-df %>%
-  filter(year=="2018") %>% 
-    ggplot(aes(x=month)) +
-    geom_bar(stat = "count") +
-    facet_wrap(~county) +
-    theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
-    ggtitle("Number of Inspection by County Per month (2018)")
+
 ```
 
 ## Inspections finding Critical Violation
@@ -155,6 +159,117 @@ df %>%
     scale_fill_manual(values = c("grey80", "dodgerblue3")) +
     theme_bw() +
     theme(axis.text.x = element_text(angle = 45, hjust = 1)) 
+
+```
+
+## Which County has the most Violation %
+
+```{r plot_2018_month_county}
+countytally <- df %>% 
+    filter(year=="2018") %>%
+    group_by(county, critical_violation) %>%
+    summarise(n=n())
+
+# Add percentage 
+countytally$percentage <- NA
+for(i in 1:nrow(countytally)){
+  countytally$percentage[i] <- round(countytally$n[i]/sum(countytally$n[countytally$county==countytally$county[i]]) * 100)
+}
+countytally <- countytally[order(countytally$percentage, decreasing = T),]
+
+countytally %>% 
+  filter(critical_violation=="Y") %>%
+  head(n=20) %>%
+    ggdotchart(x="county", y="percentage", 
+             sorting = "descending", 
+             add = "segments",
+             rotate = TRUE,
+             dot.size = 8,
+             label = "percentage", 
+             font.label = list(color = "white", size = 9, 
+                               vjust = 0.5),
+             ggtheme = theme_pubr(), 
+             title = "% of Inspections have Critical Violation in 2018: Top 20 County")
+```
+
+```{r}
+countytally %>% 
+  filter(critical_violation=="Y") %>%
+  head(n=20) 
+
+```
+
+## Do those with bad violation % have lower income? 
+
+* Census data setup requires API registration 
+```{r census_Setup}
+## Follow this guide for more detailed censusapi setup and usage https://cran.r-project.org/web/packages/censusapi/vignettes/getting-started.html
+# Add key to .Renviron
+# Sys.setenv(CENSUS_KEY=YOURKEYHERE) # Key not shown! 
+# Check to see that the expected key is output in your R console
+Sys.getenv("CENSUS_KEY")
+suppressMessages(library(censusapi))
+
+## Lookup APIS
+# apis <- listCensusApis()
+# View(apis)
+# write.csv(apis, "./cesnus/Census_Apis_20190416.csv", row.names=F)
+
+## Pick apis that should have county-level income/poverty variables
+poverty_vars <- listCensusMetadata(name = "timeseries/poverty/saipe", 
+    type = "variables")
+head(poverty_vars) # SAEMHI_PT=median household income
+
+## Check geography area to grab data
+listCensusMetadata(name = "timeseries/poverty/saipe", 
+    type = "geography")
+
+## getCensus data specifying county-level data only in New York state
+ny_income <- getCensus(name = "timeseries/poverty/saipe",
+    vars = c("NAME", "SAEMHI_PT"), #
+    region = "county:*", 
+    regionin = "state:36", # only counties within New York
+    time = 2017)
+
+ny_income$income <- as.numeric(ny_income$SAEMHI_PT) # Convert median income to numeric variable 
+ny_income$county_name <- str_remove(string = ny_income$NAME, pattern = " County") # take out " County" from string
+countytally$county_name <- str_to_title(countytally$county) # Change case to "title case" to match Census data
+
+ny_income <- merge(ny_income, countytally[countytally$critical_violation=="Y",],   # merge foodinspec & income data
+                   by="county_name")
+
+ny_income$income_med_level <- Hmisc::cut2(ny_income$income, g = 2)
+ny_income$income_quartile <- Hmisc::cut2(ny_income$income, g = 4)
+
+```
+
+
+### Counties with higher income has lower % of critical food inspeciton violation
+
+* Comparing the counties in the upper vs. lower 50% of median income, there may be a weak assocaition between income and percentage of food violation.
+
+```{r cor_income_violation}
+ny_income %>%
+   #filter(income_quartile=="[45385, 50562)" | income_quartile=="[60629,107465]") %>%
+    ggboxplot(x = "income_med_level", y = "percentage",
+          color = "income_med_level", palette = "jco",
+          add = "jitter") +
+    stat_compare_means(method = "t.test")
+```
+
+The scatter plot shows that while a linear trend is not significant, the counties with the highest income are all under 15% critival violation (grey line), proportion to the # of inspections conducted.
+```{r}
+suppressMessages(library(scales)) # for labels 
+
+ggplot(ny_income, aes(x=income, y=percentage)) +
+  geom_point() +
+  geom_smooth(method=lm, se=F) +
+  geom_hline(yintercept = 15, colour="grey50", linetype="dashed") +
+  xlab("Median Income") +
+  ylab("Percent Critical Violation") +
+  stat_cor(method = "pearson", label.x = 75000, label.y = 30) +
+  scale_x_continuous(labels = dollar) +
+  theme_bw()
 
 ```
 
