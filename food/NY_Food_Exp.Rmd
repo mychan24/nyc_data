@@ -1,0 +1,87 @@
+---
+title: "NY Food Inpspection Explore"
+author: "Micaela Chan"
+date: "4/15/2019"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+suppressMessages(library(tidyverse))
+
+## == Load Data == ## 
+datafile <- "./data/NY_Food-Service-Establishment-Inspections_2005_2019.Rdata"
+
+if(!file.exists(datafile)){   # If data not available, download it.
+  suppressMessages(library(RSocrata))
+  df <- read.socrata("https://health.data.ny.gov/resource/f285-x9ha.json")
+  dir.create("./data")
+  save(df, file = datafile)
+}else{
+  load(datafile)
+}
+```
+
+## New York Food Inspection (2005-2019)
+
+```{r check_data}
+# Glance data
+head(df)
+
+# zipcode has lots of white spaces
+head(df$zip_code)
+df$zip_code <- trimws(df$zip_code, which = "both")  # removing leading and trailing white space
+
+# Total Unique Violations
+# Notes: Cell can contain multipel violations, so a violation of "8A" is diff from "8A, 8B, 10C". 
+# Currently not useful, need to find substrings
+length(unique(df$violations))
+
+# Convert string to numeric for count type var
+df$total_critical_violations <- as.numeric(df$total_critical_violations) 
+df$total_noncritical_violations <- as.numeric(df$total_noncritical_violations)
+df$total_crit_not_corrected <- as.numeric(df$total_crit_not_corrected)
+
+# Clean dates
+df$date_format <- as.Date(df$date) # Convert date format
+df$year <- substr(cut(df$date_format, breaks = "year"), 1,4)    # Make Year variable
+df$month <- substr(cut(df$date_format, breaks = "month"), 1,7)  # Make Month variable
+```
+
+## This data is very 2018-centric. Might just want to only analyze 2018 data.
+
+```{r plot_year}
+ggplot(data = df, aes(x=year)) +
+  geom_bar(stat = "count") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  ggtitle("Number of inspection per year")
+```
+
+## Across months, the spread of inspection seems pretty even
+
+```{r plot_2018_month}
+df %>%
+  filter(year=="2018") %>% 
+    ggplot(aes(x=month)) +
+    geom_bar(stat = "count") +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+    ggtitle("Number of Inspection by Month (2018)")
+
+df %>%
+  filter(year=="2018") %>% 
+    ggplot(aes(x=month)) +
+    geom_bar(stat = "count") +
+    facet_wrap(~inspection_type) +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+    ggtitle("Number of Inspection by Month x Inspection Type (2018)")
+```
+
+```{r plot_2018_month_county}
+df %>%
+  filter(year=="2018") %>% 
+    ggplot(aes(x=month)) +
+    geom_bar(stat = "count") +
+    facet_wrap(~county) +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+    ggtitle("Number of Inspection by County Per month (2018)")
+```
