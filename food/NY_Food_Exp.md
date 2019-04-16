@@ -94,6 +94,8 @@ df %>%
 Inspections finding Critical Violation
 --------------------------------------
 
+-   Critical Violations seems to occur more during summer months (200+ violations)
+
 ``` r
 df$critical_violation <- "N"
 df$critical_violation[df$total_critical_violations!=0] <- "Y"
@@ -102,11 +104,34 @@ df %>%
   filter(year=="2018") %>%
   filter(critical_violation=="Y") %>%
   ggplot(aes(x=month)) +
-  geom_bar(stat = "count") +
-  ggtitle("Number of Inspection with Critical Violations")
+  geom_bar(stat = "count", aes(fill=..count..)) +
+  geom_hline(yintercept = 200, colour="grey50", linetype="dashed") +
+  scale_fill_gradient(low = "ghostwhite", high = "firebrick") + 
+  ggtitle("Number of Inspection with Critical Violations") +
+  theme_bw()
 ```
 
 ![](NY_Food_Exp_files/figure-markdown_github/unnamed-chunk-1-1.png)
+
+### Proportion of critical violation is not increasing
+
+-   The number of inspection during summer months are more frequent.
+
+``` r
+## Proportion to # of Inspections Occuring
+df %>%
+  filter(year=="2018") %>%
+  group_by(month,critical_violation) %>%
+  summarise(n = n())  %>% 
+    ggplot(aes(fill=critical_violation, x=month, y=n)) + 
+    geom_bar(stat="identity", position="fill") +
+    ylab("Proportion of Inspection Finding Critical Violation") +
+    scale_fill_manual(values = c("grey80", "firebrick")) +
+    theme_bw() +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1)) 
+```
+
+![](NY_Food_Exp_files/figure-markdown_github/prportion-1.png)
 
 Inspections finding Non-critical Violations
 -------------------------------------------
@@ -115,12 +140,32 @@ Inspections finding Non-critical Violations
 df$noncritical_violation <- "N"
 df$noncritical_violation[df$total_noncritical_violations!=0] <- "Y"
 
+
 df %>%
   filter(year=="2018") %>%
   filter(noncritical_violation=="Y") %>%
   ggplot(aes(x=month)) +
-  geom_bar(stat = "count") +
-  ggtitle("Number of Inspection with Non-critical Violations")
+  geom_bar(stat = "count", aes(fill=..count..)) +
+  geom_hline(yintercept = 1000, colour="grey50", linetype="dashed") +
+  scale_fill_gradient(low = "grey80", high = "dodgerblue3") + 
+  ggtitle("Number of Inspection with Non-critical Violations") +
+  theme_bw()
 ```
 
-![](NY_Food_Exp_files/figure-markdown_github/unnamed-chunk-2-1.png)
+![](NY_Food_Exp_files/figure-markdown_github/noncrit-1.png)
+
+``` r
+## Proportion to # of Inspections Occuring
+df %>%
+  filter(year=="2018") %>%
+  group_by(month,noncritical_violation) %>%
+  summarise(n = n())  %>% 
+    ggplot(aes(fill=noncritical_violation, x=month, y=n)) + 
+    geom_bar(stat="identity", position="fill") +
+    ylab("Proportion of Inspection Finding Non-Critical Violation") +
+    scale_fill_manual(values = c("grey80", "dodgerblue3")) +
+    theme_bw() +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1)) 
+```
+
+![](NY_Food_Exp_files/figure-markdown_github/noncrit-2.png)
