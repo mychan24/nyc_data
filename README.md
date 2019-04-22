@@ -26,4 +26,4 @@
 
 
 #### Special Thanks
-> All these started with existential crisis group sessions with [@coldpringles](https://github.com/coldpringles) and @SamD 
+> All these started with existential crisis group sessions with [@matlabghost](https://github.com/matlabghost) and @SamD 
