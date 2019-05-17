@@ -1,0 +1,85 @@
+---
+title: "Dallas Weather and Crime"
+author: "Micaela Chan"
+date: "5/16/2019"
+output: github_document
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(httr)
+library(jsonlite)
+library(knitr)
+library(rnoaa)
+
+#### TOKEN ####
+req_token <- "YxCWNEVbOFFHmVJiIMgUgSvOOJXlYzZK"
+
+#### Load Data ####
+# c <- RSocrata::read.socrata(url="https://www.dallasopendata.com/resource/ttvp-9tm3.csv")
+# Crime data: [Dallas Open Data](https://www.dallasopendata.com/resource/ttvp-9tm3)
+
+# w <- read.csv("./data/storm_data_search_results_20140101_20190425.csv")
+# Weather data: [NOAA Storm data](https://www.ncdc.noaa.gov/stormevents/choosedates.jsp?statefips=48%2CTEXAS#)
+
+```
+
+# NOAA Weather Data
+
+* Access through RESTful API
+    + [NOAA Data Access Documentation](https://www.ncei.noaa.gov/support/access-data-service-api-user-documentation)
+    + Endpoint: https://www.ncdc.noaa.gov/cdo-web/api/v2/
+
+## List all available CITY  
+
+* Without using `rnoaa` package
+* limited to 25 (10k request limit per day)
+
+```{r}
+source <- "https://www.ncdc.noaa.gov/cdo-web/api/v2/locations?locationcategoryid=CITY&limit=25"
+
+response <- GET(source, add_headers(token = req_token)) %>%
+  content( as="text") %>%
+  fromJSON()
+
+df <- response$results %>%
+  as.data.frame(stringsAsFactors = FALSE)
+kable(df)
+```
+
+## Find Dallas ID
+```{r}
+loc1_1000 <- ncdc_locs(locationcategoryid='CITY', sortfield='name', sortorder='desc', limit = 1000, token = req_token)
+loc1001_1987 <-  ncdc_locs(locationcategoryid='CITY', sortfield='name', sortorder='desc', limit = 1000, token = req_token, offset = 1000)
+
+loc <- rbind(loc1_1000$data, loc1001_1987$data)
+
+loc$id[grep("Dallas", loc$name)]
+```
+
+## Get Data Type
+```{r}
+source <- "https://www.ncdc.noaa.gov/cdo-web/api/v2/datasets?locationid=CITY:US480016"
+
+response <- GET(source, add_headers(token = req_token)) %>%
+  content( as="text") %>%
+  fromJSON()
+
+df <- response$results %>%
+  as.data.frame(stringsAsFactors = FALSE)
+kable(df)
+
+```
+
+
+
+## Get Dallas Data
+```{r}
+out <- ncdc(datasetid='GHCND', locationid = "ZIP:75219", startdate = '2014-01-01', enddate = '2014-12-31', token = req_token, limit=25)
+
+
+out$data$value
+```
+
+
+
